@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hikoyalar Olami</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #e2e8f0;
+            --accent-color: #f59e0b;
+            --border-color: #334155;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            /* Mobil ekranda sahifani cho'zib yubormaslik uchun */
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        header h1 {
+            font-family: 'Merriweather', serif;
+            color: var(--accent-color);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p { color: #94a3b8; font-size: 1.1rem; }
+
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .feedback-fab {
+            position: fixed; top: 15px; right: 15px;
+            width: 45px; height: 45px; /* Telefonga moslash uchun kichraytirildi */
+            background-color: #10b981; color: white;
+            border: none; border-radius: 50%; font-size: 20px;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            transition: transform 0.3s; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .feedback-fab:hover { transform: scale(1.1) rotate(10deg); }
+
+        .logout-fab {
+            position: fixed; top: 15px; left: 15px;
+            width: 45px; height: 45px; /* Telefonga moslash uchun kichraytirildi */
+            background-color: #ef4444; color: white;
+            border: none; border-radius: 50%; font-size: 18px;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            transition: transform 0.3s; z-index: 100;
+            display: none; 
+            align-items: center; justify-content: center;
+        }
+        .logout-fab:hover { transform: scale(1.1) rotate(10deg); }
+
+        .story-block {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .story-block:hover { border-color: #475569; }
+        .story-block.active { border-color: var(--accent-color); }
+
+        .story-header {
+            padding: 20px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Merriweather', serif;
+            font-size: 1.3rem;
+            color: var(--text-color);
+            transition: background 0.3s ease;
+        }
+
+        .story-header:hover { background-color: #273449; }
+
+        .story-header .arrow {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+            margin-left: 10px; /* Matn bilan birlashib ketmasligi uchun */
+        }
+
+        .story-block.active .story-header .arrow { transform: rotate(180deg); }
+
+        .story-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+            padding: 0 25px;
+        }
+
+        .story-block.active .story-content {
+            max-height: 5000px;
+            padding: 0 25px 25px 25px;
+        }
+
+        .story-content p {
+            font-family: 'Merriweather', serif;
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+            transition: font-family 0.3s ease;
+        }
+
+        .story-content .date {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 20px;
+            text-align: right;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+
+        .font-selector-container { margin: 20px 0; text-align: right; }
+        .font-selector-container label { font-size: 0.9rem; color: #94a3b8; margin-right: 8px; }
+        .font-selector {
+            background-color: var(--bg-color); color: var(--text-color);
+            border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 8px 12px; font-family: 'Poppins', sans-serif; cursor: pointer; outline: none;
+            max-width: 100%; /* Mobil uchun */
+        }
+        .font-selector:hover { border-color: var(--accent-color); }
+
+        .admin-fab {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 55px; height: 55px; /* Telefonga moslash uchun */
+            background-color: var(--accent-color); color: var(--bg-color);
+            border: none; border-radius: 50%; font-size: 22px;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+            transition: transform 0.3s; z-index: 100;
+        }
+        .admin-fab:hover { transform: scale(1.1); }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            justify-content: center; align-items: center; z-index: 200; padding: 20px;
+        }
+        .modal-overlay.show { display: flex !important; }
+
+        .modal-content {
+            background-color: var(--card-bg); padding: 30px;
+            border-radius: 15px; width: 100%; max-width: 500px;
+            border: 1px solid var(--border-color); max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .modal-content h2 { color: var(--accent-color); margin-bottom: 20px; font-family: 'Merriweather', serif; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #94a3b8; font-size: 0.9rem; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 12px; background-color: var(--bg-color);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            color: var(--text-color); font-family: 'Poppins', sans-serif; font-size: 16px; /* Mobil klaviatur uchun 16px */
+        }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        
+        .btn {
+            width: 100%; padding: 12px; background-color: var(--accent-color);
+            color: var(--bg-color); border: none; border-radius: 8px;
+            font-weight: 600; cursor: pointer; font-size: 1rem; margin-top: 10px;
+            transition: filter 0.3s;
+        }
+        .btn:hover { filter: brightness(1.1); }
+        
+        .btn-danger {
+            background-color: #ef4444; color: white;
+            border: none; padding: 6px 12px; border-radius: 6px;
+            cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: background 0.3s;
+            white-space: nowrap;
+        }
+        .btn-danger:hover { background-color: #dc2626; }
+
+        .close-btn { background: transparent; color: #94a3b8; border: none; float: right; font-size: 1.5rem; cursor: pointer; margin-top: -10px; }
+        .empty-state { text-align: center; color: #64748b; margin-top: 50px; font-style: italic; }
+        
+        .admin-section {
+            background: #172033;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .admin-section-title {
+            font-family: 'Merriweather', serif;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .admin-list-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid var(--border-color); gap: 15px;
+        }
+        .admin-list-item:last-child { border-bottom: none; }
+        .admin-list-item .item-info { flex: 1; word-break: break-word; }
+
+        /* === YANGI: MILTILLOVCHI ZARRACHALAR (KOINOT) EFFEKTI === */
+        .particles-overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: #000;
+            z-index: 9999;
+            display: none;
+            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+        }
+        .particles-overlay.show {
+            display: flex;
+        }
+        .particle {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: animParticles 1.5s ease-in-out forwards;
+        }
+        .portal-text {
+            color: var(--accent-color);
+            font-family: 'Merriweather', serif;
+            font-size: 1.8rem; /* Mobil uchun kichraytirildi */
+            text-align: center;
+            z-index: 10;
+            padding: 20px;
+            opacity: 0;
+            animation: fadeInText 1s ease 0.5s forwards;
+        }
+
+        @keyframes animParticles {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+        @keyframes fadeInText {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MOBIL TELEFON UCHUN MAXSOZLAMALAR === */
+        @media (max-width: 600px) {
+            header h1 { font-size: 2rem; }
+            header p { font-size: 1rem; }
+            .story-header { font-size: 1.1rem; padding: 15px 20px; }
+            .story-content { padding: 0 20px; }
+            .story-block.active .story-content { padding: 0 20px 20px 20px; }
+            .story-content p { font-size: 1rem; }
+            .modal-content { padding: 20px; }
+            .font-selector-container { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. RO'YXATDAN O'TISH OYNASI -->
+    <div class="modal-overlay show" id="registerModal" style="background: rgba(0,0,0,0.95);">
+        <div class="modal-content">
+            <h2>Saytga Xush Kelibsiz!</h2>
+            <p style="margin-bottom: 20px; color: #94a3b8;">Hikoyalarni o'qish uchun iltimos, ro'yxatdan o'ting.</p>
+            <div class="form-group">
+                <label>Ismingiz va Familiyangiz:</label>
+                <input type="text" id="registerName" placeholder="Masalan: Ali Valiyev">
+            </div>
+            <div class="form-group">
+                <label>Telefon raqamingiz:</label>
+                <input type="tel" id="registerPhone" placeholder="+998 90 123 45 67">
+            </div>
+            <button class="btn" onclick="registerUser()">Ro'yxatdan O'tish va Kirish</button>
+        </div>
+    </div>
+
+    <!-- ZARRACHALAR (KOINOT) EFFEKTI UCHUN QATLAM -->
+    <div class="particles-overlay" id="particlesEffect">
+        <div class="portal-text">Bosh Sahifaga Xush Kelibsiz</div>
+    </div>
+
+    <!-- 2. FIQIR VA KAMCHILIKLAR YOZISH OYNASI -->
+    <div class="modal-overlay" id="feedbackModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('feedbackModal')">&times;</button>
+            <h2>Fikr va Kamchiliklar</h2>
+            <p style="margin-bottom: 20px; color: #94a3b8; font-size: 0.9rem;">Sayt yoki hikoyalar haqidagi fikrlaringizni yozing. So'rovlar adminga yashirin tarzda yuboriladi.</p>
+            <div class="form-group">
+                <label>Xabaringiz:</label>
+                <textarea id="feedbackContent" placeholder="Fikringizni shu yerga yozing..."></textarea>
+            </div>
+            <button class="btn" onclick="submitFeedback()">Yuborish</button>
+        </div>
+    </div>
+
+    <!-- TEPADAGI TUGMALAR -->
+    <button class="logout-fab" id="logoutBtn" onclick="logoutUser()" title="Akkauntdan chiqish">🚪</button>
+    <button class="feedback-fab" onclick="openFeedbackModal()" title="Fikr bildirish">💬</button>
+
+    <!-- 3. SAYT BOSHI -->
+    <header>
+        <h1>WEB BOOK</h1>
+        <p>Online mutola uchun qulay muhit</p>
+    </header>
+
+    <main id="storiesContainer">
+        <div class="empty-state">Hozircha hikoyalar yo'q. Admin paneliga kiring va birinchi hikoyangizni qo'shing!</div>
+    </main>
+
+    <!-- ADMIN TUGMASI -->
+    <button class="admin-fab" onclick="openAdminLogin()">⚙️</button>
+
+    <!-- 4. ADMIN LOGIN OYNASI -->
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('loginModal')">&times;</button>
+            <h2>Admin Panel</h2>
+            <div class="form-group">
+                <label>Parolni kiriting:</label>
+                <input type="password" id="adminPass" placeholder="Parol..." onkeypress="if(event.key==='Enter') checkPass()">
+            </div>
+            <button class="btn" onclick="checkPass()">Kirish</button>
+            <p style="margin-top:10px; font-size:0.8rem; color:#64748b;">Parol: ****</p>
+        </div>
+    </div>
+
+    <!-- 5. ADMIN BOSHQARUV PANELI -->
+    <div class="modal-overlay" id="adminModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <button class="close-btn" onclick="closeModal('adminModal')">&times;</button>
+            <h2>Admin Boshqaruvi</h2>
+
+            <div class="admin-section">
+                <h3 class="admin-section-title" style="color: #10b981;">💬 Fikrlar va Kamchiliklar</h3>
+                <div id="adminFeedbackList"></div>
+            </div>
+
+            <div class="admin-section">
+                <h3 class="admin-section-title" style="color: var(--accent-color);">➕ Yangi Hikoya Qo'shish</h3>
+                <div class="form-group">
+                    <label>Hikoya Sarlavhasi:</label>
+                    <input type="text" id="storyTitle" placeholder="Sarlavhani kiriting...">
+                </div>
+                <div class="form-group">
+                    <label>Hikoya Matni:</label>
+                    <textarea id="storyContent" placeholder="Hikoyangizni shu yerga yozing..."></textarea>
+                </div>
+                <button class="btn" onclick="addStory()">Hikoyani Saqlash va E'lon Qilish</button>
+            </div>
+
+            <div class="admin-section">
+                <h3 class="admin-section-title" style="color: #ef4444;">🗑️ Hikoyalarni Boshqarish</h3>
+                <div id="adminStoryList"></div>
+            </div>
+
+            <div class="admin-section">
+                <h3 class="admin-section-title" style="color: #3b82f6;">👤 Foydalanuvchilar Ro'yxati</h3>
+                <div id="adminUserList"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let stories = JSON.parse(localStorage.getItem('siteStories')) || [];
+        let registeredUsers = JSON.parse(localStorage.getItem('siteUsers')) || [];
+        let feedbacks = JSON.parse(localStorage.getItem('siteFeedbacks')) || [];
+
+        if (localStorage.getItem('currentUser')) {
+            document.getElementById('registerModal').classList.remove('show');
+            document.getElementById('logoutBtn').style.display = 'flex';
+        }
+
+        // === ZARRACHARLARNI YARATISH FUNKSIYASI ===
+        function triggerParticlesEffect() {
+            const overlay = document.getElementById('particlesEffect');
+            overlay.innerHTML = '<div class="portal-text">Bosh Sahifaga Xush Kelibsiz</div>'; // Matnni qayta yuklaymiz
+            overlay.classList.add('show');
+
+            // 50 ta kichik miltillovchi zarracha (yulduzcha) yaratamiz
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Tasodifiy o'lcham va joylashuv
+                const size = Math.random() * 6 + 2; // 2px dan 8px gacha
+                const x = Math.random() * 100; // 0% dan 100% gacha (eni bo'yicha)
+                const y = Math.random() * 100; // 0% dan 100% gacha (boyi bo'yicha)
+                const delay = Math.random() * 1; // 0 dan 1 soniyagacha kechikish
+
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${x}%`;
+                particle.style.top = `${y}%`;
+                particle.style.animationDelay = `${delay}s`;
+
+                overlay.appendChild(particle);
+            }
+
+            // 1.7 soniyadan keyin effektni o'chiramiz
+            setTimeout(() => {
+                overlay.classList.remove('show');
+            }, 1700);
+        }
+
+        function registerUser() {
+            const name = document.getElementById('registerName').value.trim();
+            const phone = document.getElementById('registerPhone').value.trim();
+            if (name === '' || phone === '') { alert('Iltimos, ism va telefon raqamni to\'liq kiriting!'); return; }
+            
+            const date = new Date().toLocaleString('uz-UZ');
+            registeredUsers.push({ name, phone, date });
+            localStorage.setItem('siteUsers', JSON.stringify(registeredUsers));
+            localStorage.setItem('currentUser', JSON.stringify({ name, phone }));
+            
+            document.getElementById('registerModal').classList.remove('show');
+            document.getElementById('logoutBtn').style.display = 'flex';
+            
+            // ZARRACHAR EFFEKTINI ISHGA TUSHIRAMIZ
+            triggerParticlesEffect();
+        }
+
+        function logoutUser() {
+            if (confirm('Akkauntdan chiqmoqchimisiz?')) {
+                localStorage.removeItem('currentUser');
+                document.getElementById('logoutBtn').style.display = 'none';
+                document.getElementById('registerModal').classList.add('show');
+                
+                document.getElementById('registerName').value = '';
+                document.getElementById('registerPhone').value = '';
+            }
+        }
+
+        function openFeedbackModal() {
+            if (!localStorage.getItem('currentUser')) { alert('Iltimos, avval ro\'yxatdan o\'ting!'); return; }
+            document.getElementById('feedbackContent').value = '';
+            document.getElementById('feedbackModal').style.display = 'flex';
+        }
+
+        function submitFeedback() {
+            const content = document.getElementById('feedbackContent').value.trim();
+            if (content === '') { alert('Xabar bo\'sh bo\'lmasin!'); return; }
+
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const userName = currentUser ? currentUser.name : 'Noma\'lum foydalanuvchi';
+            const date = new Date().toLocaleString('uz-UZ');
+
+            feedbacks.push({ name: userName, content, date });
+            localStorage.setItem('siteFeedbacks', JSON.stringify(feedbacks));
+
+            closeModal('feedbackModal');
+            alert('Fikringiz uchun rahmat! Xabaringiz adminga yuborildi.');
+        }
+
+        function deleteFeedback(index) {
+            if (confirm('Bu fikrni o\'chirmoqchimisiz?')) {
+                feedbacks.splice(index, 1);
+                localStorage.setItem('siteFeedbacks', JSON.stringify(feedbacks));
+                renderFeedbacks();
+            }
+        }
+
+        function renderFeedbacks() {
+            const list = document.getElementById('adminFeedbackList');
+            list.innerHTML = '';
+            if (feedbacks.length === 0) { list.innerHTML = '<p style="color:#64748b; font-size:0.9rem; font-style:italic;">Hozircha fikrlar yo\'q.</p>'; return; }
+            feedbacks.slice().reverse().forEach((fb) => {
+                const originalIndex = feedbacks.indexOf(fb);
+                list.innerHTML += `
+                    <div class="admin-list-item">
+                        <div class="item-info">
+                            <span style="font-weight: 600; color: #10b981;">${fb.name}</span><br>
+                            <span style="font-size: 0.9rem; color: #cbd5e1; display:block; margin: 5px 0;">💬 ${fb.content}</span>
+                            <span style="font-size: 0.75rem; color: #64748b;"> ⏱ ${fb.date}</span>
+                        </div>
+                        <button class="btn-danger" onclick="deleteFeedback(${originalIndex})">O'chirish</button>
+                    </div>
+                `;
+            });
+        }
+
+        function renderUsers() {
+            const list = document.getElementById('adminUserList');
+            list.innerHTML = '';
+            if (registeredUsers.length === 0) { list.innerHTML = '<p style="color:#64748b; font-size:0.9rem; font-style:italic;">Hali ro\'yxatdan o\'tganlar yo\'q.</p>'; return; }
+            registeredUsers.forEach((user, index) => {
+                list.innerHTML += `
+                    <div class="admin-list-item">
+                        <div class="item-info">
+                            <span style="font-weight: 600; color: #e2e8f0;">${user.name}</span><br>
+                            <span style="font-size: 0.85rem; color: #94a3b8;">📞 ${user.phone}</span><br>
+                            <span style="font-size: 0.75rem; color: #64748b;">⏱ ${user.date}</span>
+                        </div>
+                        <button class="btn-danger" onclick="deleteUser(${index})">O'chirish</button>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteUser(index) {
+            if (confirm('Bu foydalanuvchini o\'chirmoqchimisiz?')) {
+                registeredUsers.splice(index, 1);
+                localStorage.setItem('siteUsers', JSON.stringify(registeredUsers));
+                renderUsers();
+            }
+        }
+
+        function renderStories() {
+            const container = document.getElementById('storiesContainer');
+            container.innerHTML = '';
+            if (stories.length === 0) { container.innerHTML = '<div class="empty-state">Hozircha hikoyalar yo\'q. Admin paneliga kiring va birinchi hikoyangizni qo\'shing!</div>'; return; }
+            stories.slice().reverse().forEach(story => {
+                const block = document.createElement('div');
+                block.className = 'story-block';
+                block.innerHTML = `
+                    <div class="story-header" onclick="toggleBlock(this)">
+                        <span>${story.title}</span>
+                        <span class="arrow">&#9660;</span>
+                    </div>
+                    <div class="story-content">
+                        <div class="font-selector-container">
+                            <label>Shrift turini tanlang:</label>
+                            <select class="font-selector" onchange="changeFontFamily(this)">
+                                <option value="Georgia, serif" style="font-family: Georgia;">Georgia (Klassik)</option>
+                                <option value="'Merriweather', serif" selected style="font-family: Merriweather;">Merriweather (Zamonaviy)</option>
+                                <option value="'Times New Roman', Times, serif" style="font-family: 'Times New Roman';">Times New Roman</option>
+                                <option value="Arial, sans-serif" style="font-family: Arial;">Arial (Sodda)</option>
+                                <option value="'Courier New', Courier, monospace" style="font-family: 'Courier New';">Courier New (Dakter)</option>
+                                <option value="Verdana, Geneva, sans-serif" style="font-family: Verdana;">Verdana (Qalin)</option>
+                                <option value="'Trebuchet MS', sans-serif" style="font-family: 'Trebuchet MS';">Trebuchet MS</option>
+                                <option value="'Palatino Linotype', 'Book Antiqua', serif" style="font-family: 'Palatino Linotype';">Palatino</option>
+                                <option value="'Gill Sans', sans-serif" style="font-family: 'Gill Sans';">Gill Sans</option>
+                                <option value="Impact, sans-serif" style="font-family: Impact;">Impact (Sarlavha uslubi)</option>
+                            </select>
+                        </div>
+                        <p class="story-text">${story.content}</p>
+                        <div class="date">Qo'shilgan sana: ${story.date}</div>
+                        <button onclick="closeStoryBlock(this)" style="margin-top: 25px; width: 100%; padding: 10px; background: #334155; color: #e2e8f0; border: 1px solid #475569; border-radius: 8px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 0.95rem; font-weight: 600;">Yopish (✖)</button>
+                    </div>
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        function changeFontFamily(selectElement) {
+            const storyText = selectElement.parentElement.nextElementSibling;
+            storyText.style.fontFamily = selectElement.value;
+        }
+
+        function toggleBlock(headerElement) { headerElement.parentElement.classList.toggle('active'); }
+
+        function closeStoryBlock(buttonElement) {
+            const block = buttonElement.parentElement.parentElement;
+            block.classList.remove('active');
+            block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderAdminStories() {
+            const list = document.getElementById('adminStoryList');
+            list.innerHTML = '';
+            if (stories.length === 0) { list.innerHTML = '<p style="color:#64748b; font-size:0.9rem; font-style:italic;">Hozircha hikoyalar yo\'q.</p>'; return; }
+            for (let i = stories.length - 1; i >= 0; i--) {
+                list.innerHTML += `
+                    <div class="admin-list-item">
+                        <span class="item-info">${stories[i].title}</span>
+                        <button class="btn-danger" onclick="deleteStory(${i})">O'chirish</button>
+                    </div>
+                `;
+            }
+        }
+
+        function addStory() {
+            const title = document.getElementById('storyTitle').value.trim();
+            const content = document.getElementById('storyContent').value.trim();
+            if (title === '' || content === '') { alert('Iltimos, sarlavha va matnni to\'ldiring!'); return; }
+            
+            const date = new Date().toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
+            stories.push({ title, content, date });
+            localStorage.setItem('siteStories', JSON.stringify(stories));
+            
+            document.getElementById('storyTitle').value = '';
+            document.getElementById('storyContent').value = '';
+            alert('Hikoya muvaffaqiyatli qo\'shildi!');
+            renderStories();
+            renderAdminStories();
+        }
+
+        function deleteStory(index) {
+            if (confirm('Rostdan ham bu hikoyani o\'chirmoqchimisiz?')) {
+                stories.splice(index, 1);
+                localStorage.setItem('siteStories', JSON.stringify(stories));
+                renderStories();
+                renderAdminStories();
+            }
+        }
+
+        function openAdminLogin() {
+            document.getElementById('adminPass').value = '';
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function checkPass() {
+            if (document.getElementById('adminPass').value === 'admin123') {
+                closeModal('loginModal');
+                openAdminPanel();
+            } else { alert('Parol noto\'g\'ri!'); }
+        }
+
+        function openAdminPanel() {
+            document.getElementById('adminModal').style.display = 'flex';
+            renderAdminStories();
+            renderUsers();
+            renderFeedbacks();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        renderStories();
+    </script>
+</body>
+</html>
